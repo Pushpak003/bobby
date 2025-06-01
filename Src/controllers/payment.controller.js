@@ -2,6 +2,7 @@ const razorpay = require("../Config/razorpay.config");
 const pool = require("../config/db");
 const crypto = require("crypto");
 const { sendEmail } = require("../services/email.service");
+const { generateInvoicePDF } = require("../services/invoiceService");
 const { sendWhatsApp } = require("../services/whatsapp.service");
 const dotenv = require("dotenv");
 dotenv.config(); // Load environment variables
@@ -34,10 +35,10 @@ exports.initiatePayment = async (req, res) => {
 exports.handleWebhook = async (req, res) => {
   const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
   const receivedSignature = req.headers["x-razorpay-signature"];
-  
+
   // Handle raw body (Buffer) from express.raw()
   const body = req.body.toString();
-  
+
   console.log("🔔 Received webhook event from Razorpay");
   console.log("📝 Request Body:", body);
   console.log("🔑 Received Signature:", receivedSignature);
@@ -45,7 +46,7 @@ exports.handleWebhook = async (req, res) => {
   // Validate signature using raw body
   const expectedSignature = crypto
     .createHmac("sha256", secret)
-    .update(body, 'utf8')
+    .update(body, "utf8")
     .digest("hex");
 
   console.log("🔐 Expected Signature:", expectedSignature);
@@ -53,7 +54,7 @@ exports.handleWebhook = async (req, res) => {
   if (receivedSignature !== expectedSignature) {
     console.warn("❌ Webhook signature mismatch");
     console.log("Body length:", body.length);
-    console.log("Secret length:", secret ? secret.length : 'undefined');
+    console.log("Secret length:", secret ? secret.length : "undefined");
     return res.status(400).send("Invalid signature");
   }
 
@@ -92,7 +93,7 @@ exports.handleWebhook = async (req, res) => {
           userData.city,
           userData.landmark,
           userData.state,
-          userData.pin_code, 
+          userData.pin_code,
           userData.pic_url,
           userData.signature_pic_url,
           userData.email,
@@ -101,13 +102,29 @@ exports.handleWebhook = async (req, res) => {
 
       console.log("✅ User inserted into database");
 
+      // Prepare user data for invoice
+      const invoiceData = {
+        name: userData.name,
+        email: userData.email,
+        phone: userData.contact_no,
+        amount: payment.amount / 100, // Convert amount from paise to rupees
+        orderId: payment.order_id,
+        paymentId: payment.id,
+        date: new Date().toLocaleDateString(),
+      };
+
+      // Generate PDF invoice
+      console.log("📄 Generating invoice PDF...");
+      const invoicePath = await generateInvoicePDF(invoiceData);
+      console.log("✅ Invoice generated at:", invoicePath);
+
       // Send email
       await sendEmail(userData.email, userData.name);
-      console.log("📧 Email sent to:", userData.email);
 
       // Send WhatsApp
-      await sendWhatsApp(userData.contact_no, userData.name);
-      console.log("📱 WhatsApp message sent to:", userData.contact_no);
+      await sendWhatsApp(userData.contact_no, userData.name, invoicePath);
+
+      // Send PDF invoice (optional)
 
       res.status(200).json({ message: "Webhook processed, user inserted" });
     } catch (err) {

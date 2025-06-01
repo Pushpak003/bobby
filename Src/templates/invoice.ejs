@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #333;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .invoice-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 20px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .invoice-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, #2E86C1, #3498DB, #5DADE2);
+    }
+
+    .header {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      padding: 40px;
+      text-align: center;
+      position: relative;
+    }
+
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 3px;
+      background: linear-gradient(90deg, #2E86C1, #3498DB);
+      border-radius: 2px;
+    }
+
+    .logo-container {
+      background: white;
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      border: 4px solid #f8f9fa;
+    }
+
+    .header img {
+      width: 100px;
+      height: auto;
+      border-radius: 8px;
+    }
+
+    .invoice-title {
+      font-size: 32px;
+      margin: 0;
+      font-weight: 700;
+      color: #2E86C1;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .invoice-subtitle {
+      font-size: 14px;
+      color: #6c757d;
+      margin-top: 8px;
+      font-weight: 400;
+    }
+
+    .content {
+      padding: 40px;
+    }
+
+    .info-section {
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 30px;
+      border: 1px solid #e9ecef;
+      position: relative;
+    }
+
+    .info-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(135deg, #2E86C1, #3498DB);
+      border-radius: 0 2px 2px 0;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #2E86C1;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+    }
+
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 2px;
+      background: linear-gradient(90deg, #2E86C1, transparent);
+      margin-left: 15px;
+      border-radius: 1px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .info-item {
+      display: flex;
+      align-items: center;
+      padding: 15px 0;
+      border-bottom: 1px solid #f1f3f4;
+    }
+
+    .info-item:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      font-weight: 600;
+      color: #495057;
+      min-width: 100px;
+      margin-right: 15px;
+    }
+
+    .info-value {
+      font-weight: 500;
+      color: #2c3e50;
+      flex: 1;
+    }
+
+    .amount-highlight {
+      background: linear-gradient(135deg, #2E86C1, #3498DB);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 25px;
+      font-weight: 600;
+      font-size: 16px;
+      box-shadow: 0 4px 15px rgba(46, 134, 193, 0.3);
+    }
+
+    .terms {
+      background: #f8f9fa;
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 30px;
+      position: relative;
+    }
+
+    .terms::before {
+      content: '📋';
+      position: absolute;
+      top: 20px;
+      right: 25px;
+      font-size: 24px;
+      opacity: 0.3;
+    }
+
+    .terms h3 {
+      font-size: 18px;
+      margin-bottom: 20px;
+      color: #2E86C1;
+      font-weight: 600;
+    }
+
+    .terms ul {
+      font-size: 14px;
+      padding-left: 0;
+      list-style: none;
+      margin: 0;
+    }
+
+    .terms li {
+      margin: 12px 0;
+      padding: 12px 0 12px 40px;
+      position: relative;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .terms li::before {
+      content: '✓';
+      position: absolute;
+      left: 15px;
+      top: 12px;
+      color: #28a745;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 30px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      position: relative;
+    }
+
+    .footer::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 3px;
+      background: linear-gradient(90deg, #2E86C1, #3498DB);
+      border-radius: 2px;
+    }
+
+    .signature-section {
+      display: inline-block;
+      text-align: center;
+    }
+
+    .signature-text {
+      font-size: 14px;
+      color: #6c757d;
+      margin-bottom: 15px;
+      font-weight: 500;
+    }
+
+    .signature-container {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      border: 2px dashed #dee2e6;
+    }
+
+    .footer img {
+      width: 120px;
+      height: auto;
+      border-radius: 5px;
+    }
+
+    .invoice-number {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: linear-gradient(135deg, #2E86C1, #3498DB);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    .date-badge {
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 15px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .contact-info {
+      margin-top: 20px;
+      padding: 20px;
+      background: rgba(46, 134, 193, 0.05);
+      border-radius: 10px;
+      border-left: 4px solid #2E86C1;
+    }
+
+    .contact-info p {
+      margin: 8px 0;
+      font-size: 13px;
+      color: #495057;
+    }
+
+    @media (max-width: 768px) {
+      .invoice-container {
+        margin: 10px;
+        border-radius: 15px;
+      }
+
+      .header,
+      .content,
+      .footer {
+        padding: 25px;
+      }
+
+      .info-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+
+      .invoice-title {
+        font-size: 24px;
+      }
+
+      .logo-container {
+        width: 100px;
+        height: 100px;
+      }
+
+      .page-break {
+        page-break-before: always;
+      }
+
+    }
+
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+      }
+
+      .invoice-container {
+        box-shadow: none;
+        max-width: none;
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="invoice-container">
+    <div class="invoice-number">INV-2024-001</div>
+
+    <div class="header">
+      <div class="logo-container">
+        <img src="https://i.pinimg.com/736x/06/3c/4e/063c4ec2fcebc5a0028a4f16007d0581.jpg" alt="Company Logo" />
+      </div>
+      <h1 class="invoice-title">Invoice</h1>
+      <p class="invoice-subtitle">Professional Service Invoice</p>
+    </div>
+
+    <div class="content">
+      <div class="info-section">
+        <h2 class="section-title">Billing Information</h2>
+        <div class="info-grid">
+          <div>
+            <div class="info-item">
+              <span class="info-label">Name:</span>
+              <span class="info-value">
+                <%= user.name %>
+              </span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Email:</span>
+              <span class="info-value">
+                <%= user.email %>
+              </span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Phone:</span>
+              <span class="info-value">
+                <%= user.phone %>
+              </span>
+            </div>
+          </div>
+          <div>
+            <div class="info-item">
+              <span class="info-label">Amount:</span>
+              <span class="info-value amount-highlight">₹<%= user.amount %></span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Date:</span>
+              <span class="info-value date-badge">
+                <%= date %>
+              </span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Status:</span>
+              <span class="info-value" style="color: #28a745; font-weight: 600;">Confirmed</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="terms">
+        <h3>Terms & Conditions</h3>
+        <ul>
+          <li>This invoice is valid for 30 days from the date of issue.</li>
+          <li>No refunds are allowed after service confirmation and delivery.</li>
+          <li>For any queries or support, please contact support@maxnet.com.</li>
+          <li>Payment should be made within the specified validity period.</li>
+          <li>Late payment charges may apply as per company policy.</li>
+        </ul>
+
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <div class="page-break"></div>
+
+        <div class="contact-info">
+          <p><strong>Need Help?</strong></p>
+          <p>📧 Email: support@maxnet.com</p>
+          <p>📞 Phone: +91-XXXX-XXXX-XX</p>
+          <p>🌐 Website: www.maxnet.com</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="signature-section">
+        <div class="signature-text">Authorized Signature & Company Seal</div>
+        <div class="signature-container">
+          <img src="https://i.pinimg.com/736x/06/3c/4e/063c4ec2fcebc5a0028a4f16007d0581.jpg"
+            alt="Official Seal & Signature" />
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

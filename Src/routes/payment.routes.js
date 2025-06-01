@@ -6,6 +6,11 @@ const {
 } = require("../controllers/payment.controller");
 
 router.post("/initiate-payment", initiatePayment);
-router.post("/payment-webhook", express.json({ type: "application/json" }), handleWebhook);
+
+// Use raw body parser for webhook to preserve original body for signature verification
+router.post("/payment-webhook", 
+  express.raw({ type: "application/json" }), 
+  handleWebhook
+);
 
 module.exports = router;

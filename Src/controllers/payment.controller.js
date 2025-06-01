@@ -3,7 +3,7 @@ const pool = require("../config/db");
 const crypto = require("crypto");
 const { sendEmail } = require("../services/email.service");
 const { sendWhatsApp } = require("../services/whatsapp.service");
-const dotenv  = require("dotenv");
+const dotenv = require("dotenv");
 dotenv.config(); // Load environment variables
 
 // Step 1: Initiate payment
@@ -34,24 +34,41 @@ exports.initiatePayment = async (req, res) => {
 exports.handleWebhook = async (req, res) => {
   const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
   const receivedSignature = req.headers["x-razorpay-signature"];
-  const body = JSON.stringify(req.body);
-
+  
+  // Handle raw body (Buffer) from express.raw()
+  const body = req.body.toString();
+  
   console.log("🔔 Received webhook event from Razorpay");
+  console.log("📝 Request Body:", body);
+  console.log("🔑 Received Signature:", receivedSignature);
 
-  // Validate signature
+  // Validate signature using raw body
   const expectedSignature = crypto
     .createHmac("sha256", secret)
-    .update(body)
+    .update(body, 'utf8')
     .digest("hex");
+
+  console.log("🔐 Expected Signature:", expectedSignature);
 
   if (receivedSignature !== expectedSignature) {
     console.warn("❌ Webhook signature mismatch");
+    console.log("Body length:", body.length);
+    console.log("Secret length:", secret ? secret.length : 'undefined');
     return res.status(400).send("Invalid signature");
   }
 
   console.log("✅ Signature verified");
 
-  const payment = req.body.payload.payment.entity;
+  // Parse the body as JSON for processing
+  let parsedBody;
+  try {
+    parsedBody = JSON.parse(body);
+  } catch (err) {
+    console.error("❌ Failed to parse JSON body:", err);
+    return res.status(400).send("Invalid JSON");
+  }
+
+  const payment = parsedBody.payload.payment.entity;
 
   if (payment.status === "captured") {
     console.log("💰 Payment captured, proceeding to save user...");
@@ -63,10 +80,9 @@ exports.handleWebhook = async (req, res) => {
 
       // Insert user into DB
       await pool.query(
-        `INSERT INTO users (form_number, name, dob, gender, aadhar_no, contact_no, address, city)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        `INSERT INTO users (name, dob, gender, aadhar_no, contact_no, address, city, landmark, state, pin_code, pic_url, signature_pic_url, email)
+   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
         [
-          userData.form_number,
           userData.name,
           userData.dob,
           userData.gender,
@@ -74,6 +90,12 @@ exports.handleWebhook = async (req, res) => {
           userData.contact_no,
           userData.address,
           userData.city,
+          userData.landmark,
+          userData.state,
+          userData.pin_code, 
+          userData.pic_url,
+          userData.signature_pic_url,
+          userData.email,
         ]
       );
 

@@ -1,5 +1,5 @@
 const razorpay = require("../Config/razorpay.config");
-const pool = require("../config/db");
+const pool = require("../Config/db");
 const crypto = require("crypto");
 const { sendEmail } = require("../services/email.service");
 const { generateInvoicePDF } = require("../services/invoiceService");
@@ -12,6 +12,7 @@ exports.initiatePayment = async (req, res) => {
   const { amount, receipt, notes } = req.body;
 
   try {
+    console.log("💰 Initiating payment with Razorpay");
     const order = await razorpay.orders.create({
       amount: amount * 100,
       currency: "INR",
@@ -25,6 +26,7 @@ exports.initiatePayment = async (req, res) => {
       currency: order.currency,
       key: process.env.RAZORPAY_KEY_ID,
     });
+    console.log("✅ Payment order created successfully:", order.id);
   } catch (err) {
     console.error("Payment initiation failed:", err);
     res.status(500).send("Payment initiation error");
@@ -115,14 +117,31 @@ exports.handleWebhook = async (req, res) => {
 
       // Generate PDF invoice
       console.log("📄 Generating invoice PDF...");
-      const invoicePath = await generateInvoicePDF(invoiceData);
-      console.log("✅ Invoice generated at:", invoicePath);
+      const invoiceUrl = await generateInvoicePDF(invoiceData);
+      console.log("✅ Invoice uploaded to Cloudinary:", invoiceUrl);
+
+      // Store invoice link in DB
+      await pool.query("UPDATE users SET invoice_link = $1 WHERE email = $2", [
+        invoiceUrl,
+        userData.email,
+      ]);
+      
 
       // Send email
       await sendEmail(userData.email, userData.name);
 
+      const formatPhoneNumber = (phone) => {
+        if (!phone.startsWith("+")) {
+          return `+91${phone}`; // Add India country code
+        }
+        return phone;
+      };
       // Send WhatsApp
-      await sendWhatsApp(userData.contact_no, userData.name, invoicePath);
+      await sendWhatsApp(
+        formatPhoneNumber(userData.contact_no),
+        userData.name,
+        invoiceUrl
+      );
 
       // Send PDF invoice (optional)
 

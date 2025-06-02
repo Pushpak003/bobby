@@ -1,4 +1,8 @@
 {
+  "main": "Src/server.js",
+  "scripts": {
+    "start": "node Src/server.js"
+  },
   "dependencies": {
     "body-parser": "^2.2.0",
     "cloudinary": "^2.6.1",

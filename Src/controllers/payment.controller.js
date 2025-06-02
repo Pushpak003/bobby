@@ -1,5 +1,5 @@
 const razorpay = require("../Config/razorpay.config");
-const pool = require("../config/db");
+const pool = require("../Config/db");
 const crypto = require("crypto");
 const { sendEmail } = require("../services/email.service");
 const { generateInvoicePDF } = require("../services/invoiceService");

@@ -34,7 +34,10 @@ const generateInvoicePDF = async (user) => {
   });
 
   // Launch browser and create PDF
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  });
+  
   const page = await browser.newPage();
   await page.setContent(html, { waitUntil: 'networkidle0' });
    // Convert to buffer
